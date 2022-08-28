@@ -1,0 +1,185 @@
+---
+title: "Bellabeat"
+output: html_notebook
+date: "2022-08-28"
+---
+
+## Instalando e carregando pacote tidyverse
+
+```{r}
+install.packages('tidyverse')
+library(tidyverse)
+```
+
+## Importando dados
+
+Definindo área de trabalho
+```{r}
+setwd("C:/Users/Bruno/Desktop/Bruno/T.I/Data Analytics - Google/8 - Projeto final de Data Analytics do Google/Caso de Estudo 2_Bellabeat/Fitabase Data 4.12.16-5.12.16")
+```
+
+Lendo arquivos .csv e atribuindo a variáveis
+```{r}
+activity  <- read.csv("dailyActivity_merged.csv")
+intensities <- read.csv("hourlyIntensities_merged.csv")
+```
+
+## Limpeza e manipulação dos dados
+
+Se familiarizando com os dados:
+
+-> Activity
+```{r}
+head(activity)
+str(activity)
+glimpse(activity)
+summary(activity)
+```
+
+-> Intensities
+```{r}
+head(intensities)
+str(intensities)
+glimpse(intensities)
+summary(intensities)
+```
+
+Olhando os valores únicos da coluna 'Id' dos dois conjuntos de dados
+```{r}
+n_distinct(activity$Id)
+n_distinct(intensities$Id)
+```
+
+Tratando a coluna 'Activityhour'
+```{r}
+intensities$ActivityHour <- as.POSIXct(intensities$ActivityHour, format = 
+"%m/%d/%Y %I:%M:%S %p")
+intensities %>% 
+ separate(
+ col = ActivityHour,
+ into = c("ActivityDate", "ActivityHour"),
+ sep = " ") -> intensities
+```
+
+Convertendo colunas 'chr' para 'date'
+```{r}
+activity$ActivityDate <- as.Date(activity$ActivityDate, format = 
+"%m/%d/%Y")
+intensities$ActivityDate <- as.Date(intensities$ActivityDate, format = 
+"%m/%d/%Y")
+```
+
+Criando uma nova coluna chamada 'weekday' e convertendo ela para o tipo fator
+```{r}
+activity$weekday <- weekdays(activity$ActivityDate)
+activity$weekday <- as.factor(activity$weekday)
+```
+
+Criando novo dataframe para análise posterior
+```{r}
+ActiveMinutes <- c("VeryActiveMinutes", "FairlyActiveMinutes", 
+"LightlyActiveMinutes", "SedentaryMinutes")
+Total <- c(sum(activity$VeryActiveMinutes),
+sum(activity$FairlyActiveMinutes), sum(activity$LightlyActiveMinutes),
+sum(activity$SedentaryMinutes))
+TotalActiveMinutes <- data.frame(ActiveMinutes, Total)
+```
+
+## Análise dos conjuntos de dados
+
+Correlação entre o total de passos e a quantidade de calorias gastas
+```{r}
+ggplot(activity) +
+ aes(TotalSteps, Calories) +
+ geom_point()
+```
+
+Retirando o outlier e adicionando uma linha de tendência de modelo linear
+```{r}
+activity %>% 
+ filter(TotalSteps < 30000 & Calories > 1000) %>% 
+ ggplot(aes(TotalSteps, Calories)) +
+ geom_point() +
+ geom_smooth(method = "lm")
+```
+
+Número de minutos de atividade alta para a quantidade de calorias gastas
+```{r}
+ggplot(activity) +
+ aes(VeryActiveMinutes, Calories) +
+ geom_point() +
+ geom_smooth(method = 'lm')
+```
+
+Tempo de minutos ativos no app
+```{r}
+ggplot(TotalActiveMinutes) +
+ aes(ActiveMinutes, Total, fill = ActiveMinutes) +
+ geom_bar(stat = "Identity") +
+ coord_flip()
+```
+
+Frequência semanal de uso do aplicativo
+```{r}
+activity %>% 
+ mutate(weekday = factor(weekday, c("domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"))) %>% 
+ ggplot(aes(weekday, fill = weekday)) +
+ geom_bar() +
+ coord_flip()
+```
+
+Média de intensidade durante o uso do app ao longo do dia
+```{r}
+intensities %>% 
+ group_by(ActivityHour) %>% 
+ summarise(avg_total_int = mean(TotalIntensity)) %>% 
+ ggplot(aes(ActivityHour, avg_total_int,)) +
+ geom_histogram(stat = "identity", fill = "purple") +
+ theme(axis.text.x = element_text(angle = 90))
+```
+
+## Compartilhar visualizações mais polidas
+
+Total de passos para quantidade de calorias gastas
+```{r}
+activity %>% 
+  filter(TotalSteps < 30000 & Calories > 1000) %>% 
+  ggplot(aes(TotalSteps, Calories)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  geom_hline(aes(yintercept = mean(Calories), linetype = "avg_calories"), colour= "red") +
+  geom_vline(aes(xintercept = mean(TotalSteps), linetype = "avg_totalsteps"), colour= "green") +
+  scale_linetype_manual(name = "legend", values = c(2, 2), 
+                        guide = guide_legend(override.aes = list(color = c("red", "green")))) +
+labs(title="Total Steps vs. Calories")
+```
+
+Tempo de atividade em minutos
+```{r}
+ggplot(TotalActiveMinutes) +
+  aes(ActiveMinutes, Total, fill = ActiveMinutes) +
+  geom_bar(stat = "Identity") +
+  coord_flip() +
+  labs(title="Active Time in Minutes")
+```
+
+Frequência de uso semanal
+```{r}
+activity %>% 
+  mutate(weekday = factor(weekday, c("domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"))) %>% 
+  ggplot(aes(weekday, fill = weekday)) +
+  geom_bar() +
+  coord_flip() +
+  labs(title="Weekly use Frequency")
+```
+
+Média de intensidade total por tempo
+```{r}
+intensities %>% 
+  group_by(ActivityHour) %>% 
+  summarise(avg_total_int = mean(TotalIntensity)) %>% 
+  ggplot(aes(ActivityHour, avg_total_int,)) +
+  geom_histogram(stat = "identity", fill = "purple") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  labs(title="Avg Total Intensity by Time")
+```
