@@ -10,7 +10,7 @@ Estudo de caso como projeto de conclusão de curso da certificação profissiona
 
 - O arquivo *.rmd* nomeado como *"Bellabeat"* contém todos os códigos executados em R
 
-- Para uma melhor visualição dos códigos executados em R, acesse o [site](https://bccalegari.github.io/projetogoogle2/)
+- Para uma melhor visualição dos códigos executados em R, clique [aqui!](https://bccalegari.github.io/projetogoogle2/)
 
 ## Ferramentas Utilizadas:
 
