@@ -1,6 +1,6 @@
 # Projeto de Análise de Dados - Bellabeat: Produtos IoT em Health Care
 
-Estudo de caso como projeto de conclusão de curso da certificação profissional de análise de dados do google, contemplando todas as etapas da análise de dados: perguntar, preparar, processar, analisar, compartilhar e agir.
+Estudo de caso como projeto de conclusão de curso da certificação profissional de análise de dados do google, contemplando todas as etapas da análise de dados: perguntar, preparar, processar, analisar, compartilhar e agir. 
 
 ## Arquivos:
 
